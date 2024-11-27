@@ -107,6 +107,17 @@ async def handle_use_macro_button(
     await client.views_open(view=view, trigger_id=body["trigger_id"])
 
 
+@app.action("use-macro-pagination")
+async def handle_use_macro_pagination_button(
+    ack: Callable[[], None], body: Dict[str, Any], client: AsyncWebClient
+):
+    await ack()
+    
+    [page, ts] = body["actions"][0]["value"].split(";", 1)
+    view = create_macro_modal(ts, body["user"]["id"], int(page))
+    await client.views_update(view=view, trigger_id=body["trigger_id"], view_id=body["view"]["root_view_id"])
+
+
 @app.action("execute-macro")
 async def handle_execute_macro_view(
     ack: Callable[[], None], body: Dict[str, Any], client: AsyncWebClient
