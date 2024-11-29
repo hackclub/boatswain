@@ -12,6 +12,7 @@ async def handle_direct_to_faq(body: Dict[str, Any], client: AsyncWebClient):
         channel=env.slack_support_channel,
         thread_ts=req["fields"]["identifier"],
         text=f"hey, this question is answered in the FAQ! You can <https://hack.club/high-seas-faq|check it out here>!\nif you have any more questions, feel free to make a new post in <#{env.slack_support_channel}>",
+        unfurl_links=True
     )
 
     await handle_mark_resolved(ts=body["message"]["ts"], resolver_id=body["user"]["id"], client=client, message=False)

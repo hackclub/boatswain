@@ -25,6 +25,7 @@ async def handle_execute_macro(
             },
             macro.message,
         ],
+        unfurl_links=True
     )
 
     user = await user_info_fut
@@ -34,6 +35,7 @@ async def handle_execute_macro(
         blocks=[macro.message],
         username=user["user"]["profile"]["display_name"] or user["user"]["real_name"],
         icon_url=user["user"]["profile"]["image_48"],
+        unfurl_links=True
     )
 
     if macro.close:

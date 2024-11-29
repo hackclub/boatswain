@@ -101,6 +101,7 @@ async def handle_new_support_response(body: Dict[str, Any], client: AsyncWebClie
         text=text,
         username=user["user"]["profile"]["display_name"] or user["user"]["real_name"],
         icon_url=user["user"]["profile"]["image_48"],
+        unfurl_links=True
     )
 
 
@@ -129,6 +130,7 @@ async def handle_new_message(body: Dict[str, Any], client: AsyncWebClient):
             channel=env.slack_support_channel,
             thread_ts=body["event"]["ts"],
             text=f"hey there {user["user"]["profile"]["display_name"] or user["user"]["real_name"]}! it looks like this is your first time in the support channel. We've recieved your question and will get back to you as soon as possible. In the meantime, feel free to check out our <https://hack.club/high-seas-faq|FAQ> for answers to common questions. If you have any more questions, please make a new post in <#{env.slack_support_channel}> so we can help you quicker!",
+            unfurl_links=True
         )
 
     thread_url = f"https://hackclub.slack.com/archives/{env.slack_support_channel}/p{body['event']['ts'].replace('.', '')}"
@@ -174,6 +176,7 @@ async def handle_new_message(body: Dict[str, Any], client: AsyncWebClient):
         text="",
         username=user["user"]["profile"]["display_name"] or user["user"]["real_name"],
         icon_url=user["user"]["profile"]["image_48"],
+        unfurl_links=True
     )
 
     env.airtable.create_request(
@@ -284,4 +287,5 @@ async def handle_new_request_message(body: Dict[str, Any], client: AsyncWebClien
         text=text,
         username=user["user"]["profile"]["display_name"] or user["user"]["real_name"],
         icon_url=user["user"]["profile"]["image_48"],
+        unfurl_links=True
     )

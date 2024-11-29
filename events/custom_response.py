@@ -89,5 +89,6 @@ async def handle_custom_response(body: Dict[str, Any], client: AsyncWebClient):
                 username=user["user"]["profile"]["display_name"]
                 or user["user"]["real_name"],
                 icon_url=user["user"]["profile"]["image_48"],
+                unfurl_links=True
             )
             break
