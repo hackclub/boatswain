@@ -4,6 +4,7 @@ from slack_bolt.adapter.starlette.async_handler import AsyncSlackRequestHandler
 from starlette.applications import Starlette
 from starlette.routing import Route
 from starlette.responses import JSONResponse
+import sentry_sdk
 
 from threading import Thread
 from typing import Callable, Dict, Any
@@ -20,6 +21,8 @@ from views.create_bug import get_modal as create_bug_modal
 from views.use_macro import get_modal as create_macro_modal
 from views.create_macro import get_modal as create_create_macro_modal
 
+sentry_sdk.init(env.sentry_dsn, traces_sample_rate=1.0)
+sentry_sdk.profiler.start_profiler()
 app = AsyncApp(token=env.slack_bot_token, signing_secret=env.slack_signing_secret)
 
 

@@ -19,6 +19,8 @@ class Environment:
         self.threadlocker_api_key = os.environ.get("THREADLOCKER_API_KEY")
         self.airtable_api_key = os.environ.get("AIRTABLE_API_KEY")
         self.airtable_base_id = os.environ.get("AIRTABLE_BASE_ID")
+        self.sentry_dsn = os.environ.get("SENTRY_DSN")
+        self.environment = os.environ.get("ENVIRONMENT", "development")
 
         self.port = int(os.environ.get("PORT", 3000))
 
@@ -46,6 +48,8 @@ class Environment:
             raise Exception("AIRTABLE_API_KEY is not set")
         if not self.airtable_base_id:
             raise Exception("AIRTABLE_BASE_ID is not set")
+        if not self.sentry_dsn and self.environment == "production":
+            raise Exception("SENTRY_DSN is not set")
 
         self.airtable = AirtableManager(
             api_key=self.airtable_api_key, base_id=self.airtable_base_id
