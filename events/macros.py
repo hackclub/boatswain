@@ -20,7 +20,7 @@ async def handle_execute_macro(
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": f"<@{user_id}> executed {macro.name} on this thread:",
+                    "text": f"{macro.name} executed by {user_id} on this thread:",
                 },
             },
             macro.message,
