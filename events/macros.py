@@ -12,6 +12,9 @@ async def handle_execute_macro(
 ):
     user_info_fut = asyncio.create_task(client.users_info(user=user_id))
 
+    user = await user_info_fut
+    user_name = user["user"]["profile"]["display_name"] or user["user"]["real_name"]
+
     await client.chat_postMessage(
         channel=env.slack_request_channel,
         thread_ts=ts,
@@ -20,7 +23,7 @@ async def handle_execute_macro(
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": f"<@{user_id}> executed {macro.name} on this thread:",
+                    "text": f"{user_name} executed {macro.name} on this thread:",
                 },
             },
             macro.message,
@@ -28,12 +31,11 @@ async def handle_execute_macro(
         unfurl_links=True
     )
 
-    user = await user_info_fut
     await client.chat_postMessage(
         channel=env.slack_support_channel,
         thread_ts=env.airtable.get_request(priv_thread_ts=ts)["fields"]["identifier"],
         blocks=[macro.message],
-        username=user["user"]["profile"]["display_name"] or user["user"]["real_name"],
+        username=user_name,
         icon_url=user["user"]["profile"]["image_48"],
         unfurl_links=True
     )
