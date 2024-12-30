@@ -15,6 +15,8 @@ class AirtableManager:
     def __init__(self, api_key: str, base_id: str):
         api = Api(api_key)
         self.people_table = api.table(base_id, "people")
+        self.hs_people_table = api.table(base_id, "hs_people")
+        self.fraud_data_table = api.table(base_id, "fraud_data")
         self.help_table = api.table(base_id, "help")
         self.macro_table = api.table(base_id, "macro")
         print("Connected to Airtable")
@@ -154,3 +156,11 @@ class AirtableManager:
         if not req:
             return
         self.help_table.delete(req["id"])
+
+    def get_fraud_data(self, user_id: str):
+        fraud_data = self.fraud_data_table.all(formula=f'{{Slack ID}} = "{user_id}"')
+        return fraud_data
+    
+    def get_hs_user(self, user_id: str):
+        user = self.hs_people_table.first(formula=f'{{slack_id}} = "{user_id}"')
+        return user
