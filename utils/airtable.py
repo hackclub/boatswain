@@ -99,6 +99,8 @@ class AirtableManager:
             req = self.help_table.first(
                 formula=f'{{internal_thread}} = "{priv_thread_ts}"'
             )
+        else:
+            return None
 
         return req
 
