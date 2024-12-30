@@ -14,7 +14,7 @@ async def handle_mark_bug(body: Dict[str, Any], client: AsyncWebClient):
 
     req = env.airtable.update_request(
         priv_thread_ts=ts,
-        **{
+        updates={
             "status": "responded",
             "bug_report": True,
         },

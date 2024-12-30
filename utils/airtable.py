@@ -2,6 +2,7 @@ import dataclasses
 import json
 from typing import Any, Dict, List
 from pyairtable import Api
+from pyairtable.api.types import RecordDict, RecordDeletedDict, WritableFields
 
 
 @dataclasses.dataclass
@@ -21,7 +22,7 @@ class AirtableManager:
         self.macro_table = api.table(base_id, "macro")
         print("Connected to Airtable")
 
-    def ping(self):
+    def ping(self) -> bool:
         try:
             self.people_table.first()
             return True
@@ -29,8 +30,8 @@ class AirtableManager:
             print(f"Error pinging Airtable: {e}")
             return False
 
-    def create_person(self, first_name: str, last_name: str, email: str, slack_id: str):
-        self.people_table.create(
+    def create_person(self, first_name: str, last_name: str, email: str, slack_id: str) -> RecordDict:
+        return self.people_table.create(
             {
                 "first_name": first_name,
                 "last_name": last_name,
@@ -40,7 +41,7 @@ class AirtableManager:
             }
         )
 
-    def get_person(self, user_id: str):
+    def get_person(self, user_id: str) -> RecordDict | None:
         user = self.people_table.first(formula=f'{{slack_id}} = "{user_id}"')
         return user
     
@@ -53,7 +54,7 @@ class AirtableManager:
             assert macros["fields"]["version"] == 1
             return [Macro(**x) for x in json.loads(macros["fields"]["data"])]
         
-    def insert_macro(self, user_id: str, macro: Macro):
+    def insert_macro(self, user_id: str, macro: Macro) -> RecordDict:
         macro_dict = dataclasses.asdict(macro)
         macros = self.macro_table.first(formula=f'{{slack_id}} = "{user_id}"')
         
@@ -61,7 +62,7 @@ class AirtableManager:
             person = self.get_person(user_id)
             assert person
             
-            self.macro_table.create(
+            return self.macro_table.create(
                 {
                     "slack_id": user_id,
                     "version": 1,
@@ -71,7 +72,7 @@ class AirtableManager:
             )
         else:
             assert macros["fields"]["version"] == 1
-            self.macro_table.update(
+            return self.macro_table.update(
                 macros["id"],
                 {
                     "version": 1,
@@ -79,12 +80,12 @@ class AirtableManager:
                 }
             )
     
-    def delete_macro(self, user_id: str, macro_id: int):
+    def delete_macro(self, user_id: str, macro_id: int) -> RecordDict:
         macros = self.macro_table.first(formula=f'{{slack_id}} = "{user_id}"')
         assert macros
         macros_list = json.loads(macros["fields"]["data"])
         
-        self.macro_table.update(
+        return self.macro_table.update(
             macros["id"],
             {
                 "version": 1,
@@ -94,7 +95,7 @@ class AirtableManager:
 
     def get_request(
         self, pub_thread_ts: str | None = None, priv_thread_ts: str | None = None
-    ):
+    ) -> RecordDict | None:
         if pub_thread_ts:
             req = self.help_table.first(formula=f'{{identifier}} = "{pub_thread_ts}"')
         elif priv_thread_ts:
@@ -108,14 +109,14 @@ class AirtableManager:
 
     def create_request(
         self, pub_thread_ts: str, content: str, user_id: str, priv_thread_ts: str
-    ):
+    ) -> RecordDict | None:
         print(f"Creating help request for user: {user_id}")
         linked_record = self.get_person(user_id)
         if not linked_record:
             print("User not found in airtable - HANDLE THIS")
             return None
 
-        self.help_table.create(
+        res = self.help_table.create(
             {
                 "identifier": pub_thread_ts,
                 "content": content,
@@ -123,23 +124,24 @@ class AirtableManager:
                 "internal_thread": priv_thread_ts,
             }
         )
-        return True
+        return res
 
     def update_request(
         self,
         pub_thread_ts: str | None = None,
         priv_thread_ts: str | None = None,
-        **updates: dict,
-    ):
+        updates: WritableFields = {},
+    ) -> RecordDict | None:
         req = self.get_request(
             pub_thread_ts=pub_thread_ts, priv_thread_ts=priv_thread_ts
         )
         if not req:
             return
+        
         req = self.help_table.update(req["id"], updates)
         return req
 
-    def resolve_request(self, priv_thread_ts: str, resolver: str):
+    def resolve_request(self, priv_thread_ts: str, resolver: str) -> RecordDict | None:
         resolver_item = self.get_person(resolver)
         if not resolver_item:
             return
@@ -151,16 +153,17 @@ class AirtableManager:
             req["id"], {"resolver": [id], "status": "resolved"}
         )
 
-    def delete_req(self, pub_thread_ts: str):
+    def delete_req(self, pub_thread_ts: str) -> RecordDeletedDict | None:
         req = self.get_request(pub_thread_ts)
         if not req:
             return
-        self.help_table.delete(req["id"])
+        req = self.help_table.delete(req["id"])
+        return req
 
-    def get_fraud_data(self, user_id: str):
+    def get_fraud_data(self, user_id: str) -> List[RecordDict]:
         fraud_data = self.fraud_data_table.all(formula=f'{{Slack ID}} = "{user_id}"')
         return fraud_data
     
-    def get_hs_user(self, user_id: str):
+    def get_hs_user(self, user_id: str) -> RecordDict | None:
         user = self.hs_people_table.first(formula=f'{{slack_id}} = "{user_id}"')
         return user
