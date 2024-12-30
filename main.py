@@ -16,7 +16,6 @@ from events.on_message import handle_message
 from events.mark_resolved import handle_mark_resolved
 from events.direct_to_faq import handle_direct_to_faq
 from events.mark_bug import handle_mark_bug
-from events.custom_response import handle_custom_response_btn, handle_custom_response
 from views.create_bug import get_modal as create_bug_modal
 from views.use_macro import get_modal as create_macro_modal
 from views.create_macro import get_modal as create_create_macro_modal
@@ -80,24 +79,6 @@ async def handle_create_bug_view(
     await ack()
 
     await handle_mark_bug(body, client)
-
-
-@app.action("custom-response")
-async def handle_custom_response_button(
-    ack: Callable[[], None], body: Dict[str, Any], client: AsyncWebClient
-):
-    await ack()
-
-    await handle_custom_response_btn(body, client)
-
-
-@app.view("custom_response_view")
-async def handle_custom_response_view(
-    ack: Callable[[], None], body: Dict[str, Any], client: AsyncWebClient
-):
-    await ack()
-
-    await handle_custom_response(body, client)
 
 
 @app.action("use-macro")
@@ -173,9 +154,8 @@ async def handle_create_macro_view_submission(
 
 app_handler = AsyncSlackRequestHandler(app)
 
-from starlette.applications import Starlette
+
 from starlette.requests import Request
-from starlette.routing import Route
 
 async def endpoint(req: Request):
     return await app_handler.handle(req)
