@@ -28,7 +28,8 @@ async def handle_execute_macro(
             },
             macro.message,
         ],
-        unfurl_links=True
+        unfurl_links=True,
+        unfurl_media=True
     )
 
     await client.chat_postMessage(
@@ -37,7 +38,8 @@ async def handle_execute_macro(
         blocks=[macro.message],
         username=user_name,
         icon_url=user["user"]["profile"]["image_48"],
-        unfurl_links=True
+        unfurl_links=True,
+        unfurl_media=True
     )
 
     if macro.close:

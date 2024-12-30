@@ -62,7 +62,8 @@ async def handle_mark_resolved(
             thread_ts=res["fields"]["identifier"],
             text=custom_response
             or f"This post has been marked as resolved by <@{resolver_id}>!\nIf you have any more questions, please make a new post in <#{env.slack_support_channel}> and we'll be happy to help you out!",
-            unfurl_links=True
+            unfurl_links=True,
+            unfurl_media=True
         )
     
     await task
