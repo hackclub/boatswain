@@ -183,7 +183,7 @@ async def handle_new_message(body: Dict[str, Any], client: AsyncWebClient):
     fraud_data = env.airtable.get_fraud_data(body["event"]["user"]) or {}
     
     stage = hs_user.get("fields", {}).get("stage", "unknown").replace("_", " ").title()
-    verification_status = hs_user.get("fields", {}).get("verification_status", ["Unknown"])[0]
+    verification_status = hs_user.get("fields", {}).get("verification_status", ["Not submitted"])[0]
     
     doubloons_paid = hs_user.get("fields", {}).get("doubloons_paid", 0)
     doubloons_spent = hs_user.get("fields", {}).get("doubloons_spent", 0)
