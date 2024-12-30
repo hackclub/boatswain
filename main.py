@@ -1,10 +1,11 @@
+from sentry_sdk import init, profiler
 from slack_bolt.async_app import AsyncAck, AsyncApp
 from slack_sdk.web.async_client import AsyncWebClient
 from slack_bolt.adapter.starlette.async_handler import AsyncSlackRequestHandler
 from starlette.applications import Starlette
-from starlette.routing import Route
 from starlette.responses import JSONResponse
-from sentry_sdk import init, profiler
+from starlette.requests import Request
+from starlette.routing import Route
 
 from threading import Thread
 from typing import Dict, Any
@@ -155,7 +156,6 @@ async def handle_create_macro_view_submission(
 app_handler = AsyncSlackRequestHandler(app)
 
 
-from starlette.requests import Request
 
 async def endpoint(req: Request):
     return await app_handler.handle(req)

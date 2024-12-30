@@ -8,6 +8,12 @@ from events.mark_resolved import handle_mark_resolved
 
 async def handle_direct_to_faq(body: Dict[str, Any], client: AsyncWebClient):
     req = env.airtable.get_request(priv_thread_ts=body["message"]["ts"])
+    if not req:
+        await client.chat_postMessage(
+            channel=env.slack_ticket_creator,
+            text=f"Something went wrong with fetching `{body['message']['ts']}` from Airtable.",
+        )
+        return
     await client.chat_postMessage(
         channel=env.slack_support_channel,
         thread_ts=req["fields"]["identifier"],

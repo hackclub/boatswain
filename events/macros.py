@@ -31,10 +31,18 @@ async def handle_execute_macro(
         unfurl_links=True,
         unfurl_media=True
     )
+    
+    req = env.airtable.get_request(priv_thread_ts=ts)
+    if not req:
+        await client.chat_postMessage(
+            channel=env.slack_ticket_creator,
+            text=f"Something went wrong with fetching `{ts}` from Airtable.",
+        )
+        return
 
     await client.chat_postMessage(
         channel=env.slack_support_channel,
-        thread_ts=env.airtable.get_request(priv_thread_ts=ts)["fields"]["identifier"],
+        thread_ts=req["fields"]["identifier"],
         blocks=[macro.message],
         username=user_name,
         icon_url=user["user"]["profile"]["image_48"],
