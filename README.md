@@ -9,6 +9,7 @@ Boatswain is a Slack app for #high-seas-help in the Hack Club Slack. It's built 
 - **Airtable Integration** - All support threads are logged in an Airtable base for easy tracking and analytics.
 - **GitHub Issue Creation** - If a support thread is deemed to be a bug, a GitHub issue can be created directly from the thread by clicking a button to open a modal.
 - **Resolving** - Once a thread is resolved, the lifeguard can mark it as resolved and it will be logged in Airtable as such and all traces will be deleted from the private channel.
+- **User Information** - When a new request is created, Boatswain will automatically send a message in the thread with information about the users votes, ships, any fraud cases, doubloons and more.
 
 The goal is that the private channel remains empty, meaning there are no more questions to respond to.
 
