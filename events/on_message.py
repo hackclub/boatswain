@@ -1,10 +1,11 @@
+import json, asyncio
 from slack_sdk.web.async_client import AsyncWebClient
 from typing import Dict, Any
 
-
 from events.macros import handle_execute_macro
+from utils.info import get_user_info
 from utils.env import env
-from utils.queue import add_message_to_delete_queue
+from events.mark_resolved import delete_task
 
 async def handle_message(body: Dict[str, Any], client: AsyncWebClient, say):
     if body["event"]["channel"] not in [
@@ -179,62 +180,7 @@ async def handle_new_message(body: Dict[str, Any], client: AsyncWebClient):
         priv_thread_ts=msg["ts"],
     )
     
-    hs_user = env.airtable.get_hs_user(body["event"]["user"]) or {}
-    fraud_data = env.airtable.get_fraud_data(body["event"]["user"]) or {}
-    
-    stage = hs_user.get("fields", {}).get("stage", "unknown").replace("_", " ").title()
-    verification_status = hs_user.get("fields", {}).get("verification_status", ["Not submitted"])[0]
-    
-    doubloons_paid = hs_user.get("fields", {}).get("doubloons_paid", 0)
-    doubloons_spent = hs_user.get("fields", {}).get("doubloons_spent", 0)
-    doubloons_balance = hs_user.get("fields", {}).get("doubloons_balance", 0)
-    doubloons_granted = hs_user.get("fields", {}).get("doubloons_granted", 0)
-    
-    unique_vote_count = hs_user.get("fields", {}).get("unique_vote_count", 0)
-    vote_count = hs_user.get("fields", {}).get("vote_count", 0)
-    total_ships = hs_user.get("fields", {}).get("total_ships", 0)
-    
-    has_ordered_free_stickers = hs_user.get("fields", {}).get("has_ordered_free_stickers", False)
-    
-    waka_total_hours_logged = hs_user.get("fields", {}).get("waka_total_hours_logged", 0)
-    
-    disciplinary_status = hs_user.get("fields", {}).get("disciplinary_status", "None")
-    
-    total_cases = len(fraud_data)
-    open_cases = 0
-    for case in fraud_data:
-        if case["fields"]["Status"] not in ["Resolved", "Duplicate Case"]:
-            open_cases += 1
-    
-    data_blocks = [
-        {
-            "type": "section",
-            "fields": [
-                {
-                    "type": "mrkdwn",
-                    "text": f"""
-*:face_with_monocle: User Data:*
-*Stage:* {stage}\n
-*Verification Status:* {verification_status}\n
-*Disciplinary Status:* {disciplinary_status}\n
-*Open Fraud Cases:* {open_cases}/{total_cases}
-
-*:doubloon: Doubloons:*
-*Paid:* {doubloons_paid}\n
-*Spent:* {doubloons_spent}\n
-*Granted:* {doubloons_granted}\n
-*Balance:* {doubloons_balance}\n
-
-*:ship: Shippy Stats:*
-*Unique Votes:* {unique_vote_count}/{vote_count}\n
-*Total Ships:* {total_ships}\n
-*Ordered Free Stickers:* {has_ordered_free_stickers}\n
-*Total Hours Logged*: {waka_total_hours_logged}
-                    """
-                },
-            ]
-        }
-    ]
+    data_blocks = get_user_info(body["event"]["user"])
     
     await client.chat_postMessage(
         channel=env.slack_request_channel,
@@ -291,20 +237,21 @@ async def handle_edited_message(body: Dict[str, Any], client: AsyncWebClient, ts
 
 
 async def handle_deleted_message(body: Dict[str, Any], client: AsyncWebClient):
-    if body["event"].get("previous_message", {}).get("thread_ts"):
+    await client.chat_postMessage(text=f"```{json.dumps(body, indent=2)}```", channel=env.slack_request_channel)
+    if body["event"].get("ts", {}):
         return
     
-    env.airtable.delete_req(body["event"]["previous_message"]["ts"])
+    # env.airtable.delete_req(body["event"]["previous_message"]["ts"])
     msg = await client.conversations_history(
         channel=env.slack_request_channel,
-        latest=body["event"]["previous_message"]["ts"],
+        latest=body["event"]["ts"],
         limit=1,
         inclusive=True,
     )
     if msg:
-        add_message_to_delete_queue(
-            channel_id=env.slack_request_channel, message_ts=msg["messages"][0]["ts"]
-        )
+        ts = msg["messages"][0]["ts"]
+        task = asyncio.create_task(delete_task(ts, client))
+        await task
 
 
 async def handle_new_request_message(body: Dict[str, Any], client: AsyncWebClient):

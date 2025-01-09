@@ -1,5 +1,5 @@
 from sentry_sdk import init, profiler
-from slack_bolt.async_app import AsyncAck, AsyncApp
+from slack_bolt.async_app import AsyncAck, AsyncApp, AsyncRespond
 from slack_sdk.web.async_client import AsyncWebClient
 from slack_bolt.adapter.starlette.async_handler import AsyncSlackRequestHandler
 from starlette.applications import Starlette
@@ -11,6 +11,7 @@ from threading import Thread
 from typing import Dict, Any
 
 from events.macros import create_macro, handle_execute_macro
+from utils.info import get_user_info
 from utils.env import env
 from utils.queue import process_queue
 from events.on_message import handle_message
@@ -150,6 +151,25 @@ async def handle_create_macro_view_submission(
         body["view"]["state"]["values"]["name"]["name"]["value"],
         body["view"]["state"]["values"]["message"]["message"]["rich_text_value"],
         body["view"]["state"]["values"]["behaviour"]["behaviour"]["selected_option"]["value"] == "close"
+    )
+
+@app.command("/hs-lookup")
+async def hs_lookup(ack: AsyncAck, body: Dict[str, Any], client: AsyncWebClient, respond: AsyncRespond):
+    await ack()
+    user_id = body["user_id"]
+    lifeguards = await client.usergroups_users_list(usergroup="S07U41270QN")
+    if user_id not in lifeguards.get("users", []):
+        return await respond("You do not have permission to use this command. If you think this is a mistake, please message <@U054VC2KM9P>")
+    
+    target = body["text"].split("|")[0][2:]
+    
+    blocks = get_user_info(target)
+    
+    await respond(
+        blocks=blocks,
+        unfurl_links=True,
+        unfurl_media=True,
+        text=f"High Seas user information for <@{target}>"
     )
 
 
