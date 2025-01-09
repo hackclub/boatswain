@@ -237,7 +237,6 @@ async def handle_edited_message(body: Dict[str, Any], client: AsyncWebClient, ts
 
 
 async def handle_deleted_message(body: Dict[str, Any], client: AsyncWebClient):
-    await client.chat_postMessage(text=f"```{json.dumps(body, indent=2)}```", channel=env.slack_request_channel)
     if body["event"].get("ts", {}):
         return
     
