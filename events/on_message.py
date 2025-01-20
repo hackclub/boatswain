@@ -59,10 +59,11 @@ async def handle_new_support_response(body: Dict[str, Any], client: AsyncWebClie
     req = env.airtable.get_request(body["event"]["thread_ts"])
     if not req:
         return
-
-    if req["fields"]["status"] == "resolved":
-        return
-
+    try:
+        if req["fields"]["status"] == "resolved":
+            return
+    except KeyError:
+        pass
     req_msg = await client.conversations_history(
         channel=env.slack_request_channel,
         latest=req["fields"]["internal_thread"],

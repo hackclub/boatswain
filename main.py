@@ -11,6 +11,7 @@ from threading import Thread
 from typing import Dict, Any
 
 from events.macros import create_macro, handle_execute_macro
+from events.on_reaction import handle_reaction
 from utils.info import get_user_info
 from utils.env import env
 from utils.queue import process_queue
@@ -38,11 +39,13 @@ async def ping(request):
         "message": "App is running"
     })
 
-
 @app.event("message")
 async def handle_message_events(body: Dict[str, Any], client: AsyncWebClient, say):
     await handle_message(body, client, say)
 
+@app.event("reaction_added")
+async def handle_reaction_added_events(body: Dict[str, Any], client: AsyncWebClient):
+    await handle_reaction(body, client)
 
 @app.action("mark-resolved")
 async def handle_mark_resolved_button(

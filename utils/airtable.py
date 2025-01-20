@@ -44,6 +44,10 @@ class AirtableManager:
     def get_person(self, user_id: str) -> RecordDict | None:
         user = self.people_table.first(formula=f'{{slack_id}} = "{user_id}"')
         return user
+    def get_person_by_id(self, id: str) -> RecordDict | None:
+        """Gets person by their Airtable ID"""
+        user = self.people_table.get(id)
+        return user
     
     def get_macros(self, user_id: str) -> List[Macro]:
         macros = self.macro_table.first(formula=f'{{slack_id}} = "{user_id}"')
@@ -146,6 +150,7 @@ class AirtableManager:
         if not resolver_item:
             return
         id = resolver_item.get("id")
+
         req = self.get_request(priv_thread_ts=priv_thread_ts)
         if not req:
             return
