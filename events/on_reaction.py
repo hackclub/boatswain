@@ -5,7 +5,6 @@ from utils.env import env
 
 
 async def handle_reaction(body: Dict[str, Any], client: AsyncWebClient):
-    print(body)
     if body["event"]["reaction"] == "white_check_mark":
         help_event = env.airtable.get_request(pub_thread_ts=body["event"]["item"]["ts"])
         try:
@@ -23,11 +22,3 @@ async def handle_reaction(body: Dict[str, Any], client: AsyncWebClient):
             OG_slack_asker_slackid = None
         if OG_slack_asker_slackid == resolver_id:
             await handle_mark_resolved(ts, resolver_id, client)
-        else:
-            await client.chat_postMessage(
-            channel=env.slack_support_channel,
-            thread_ts=body["event"]["item"]["ts"],
-            text=f"Hey <@{OG_slack_asker_slackid}>, <@{resolver_id}> belives they have resolved this issue. If you believe this issue is resolved, please react with :white_check_mark: to confirm on the original thread (the one with the :thinking_face:).",
-            unfurl_links=True,
-            unfurl_media=True
-        )
