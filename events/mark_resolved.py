@@ -16,12 +16,13 @@ async def delete_task(ts: str, client: AsyncWebClient):
         )
 
 
+
 async def handle_mark_resolved(
     ts,
     resolver_id,
     client: AsyncWebClient,
     message: bool = True,
-    custom_response: str | None = None,
+    custom_response: str | None = None
 ):
     # channel_name = await client.conversations_info(channel=env.slack_support_channel)
     # if not channel_name["channel"]["is_channel"]:
