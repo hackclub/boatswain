@@ -126,6 +126,14 @@ async def handle_new_message(body: Dict[str, Any], client: AsyncWebClient):
             unfurl_links=True,
             unfurl_media=True
         )
+    if count > 0:
+        await client.chat_postMessage(
+            channel=env.slack_support_channel,
+            thread_ts=body["event"]["ts"],
+            text =f"Hey! Since there are lot of messages , we might not be able to respond in time. In the mean time, please check out this <https://hackclub.slack.com/archives/C07PZNMBPBN/p1738513151267639|FAQ> message to see if your issue is already mention and answered! If it is, react to the original message with :white_check_mark: to mark it as solved!",
+            unfurl_links=True,
+            unfurl_media=True
+        )    
 
     thread_url = f"https://hackclub.slack.com/archives/{env.slack_support_channel}/p{body['event']['ts'].replace('.', '')}"
     new_blocks = [
