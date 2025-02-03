@@ -130,7 +130,7 @@ async def handle_new_message(body: Dict[str, Any], client: AsyncWebClient):
         await client.chat_postMessage(
             channel=env.slack_support_channel,
             thread_ts=body["event"]["ts"],
-            text =f"Hey! Since there are lot of messages , we might not be able to respond in time. In the mean time, please check out this <https://hackclub.slack.com/archives/C07PZNMBPBN/p1738513151267639|FAQ> message to see if your issue is already mention and answered! If it is, react to the original message with :white_check_mark: to mark it as solved!",
+            text =f"Hey! Since there are lot of messages, we may not be able to respond to everybody. However, please check out this <https://hackclub.slack.com/docs/T0266FRGM/F08B1APQUFR|FAQ> to see if your issue is already answered! If it is, react to the original message with :white_tick: to mark it as resolved!",
             unfurl_links=True,
             unfurl_media=True
         )    
