@@ -17,7 +17,7 @@ pyairtable==2.3.3
 pydantic==2.10.2
 pydantic_core==2.27.1
 python-dotenv==1.0.1
-requests==2.32.3
+requests==2.33.0
 sentry-sdk==2.19.0
 slack_bolt==1.20.1
 slack_sdk==3.33.4
